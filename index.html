@@ -107,6 +107,11 @@
     section.scene.parents{
       min-height:0; scroll-snap-align:none; scroll-snap-stop:normal;
     }
+    /* Сундук и RSVP: контент короче экрана, из-за центрирования на
+       весь vh между ними получался огромный пустой промежуток. */
+    section.scene.chest, section.scene.rsvp{
+      min-height:0; justify-content:flex-start;
+    }
   }
   @media (max-width:819px) and (prefers-reduced-motion: reduce){
     html{ scroll-snap-type:none; }
@@ -749,7 +754,7 @@
     route:{
       titleLine1:"Карта секретной",
       titleLine2:"экспедиции",
-      lede:"Путь начинается здесь"
+      lede:"Что нас ждёт?"
     },
     find:{
       title:"Место сбора команды",
@@ -1534,8 +1539,10 @@
         setTimeout(revealVideo, 400);
 
         try{
-          video.src = "./IMG_8829.mp4";
+          video.src = "./IMG_8829.MP4";
           video.load();
+          video.currentTime = 0;
+          video.playbackRate = 1;
           var p = video.play();
           if(p && p.catch) p.catch(finishToOpen);
         }catch(e){ finishToOpen(); }
