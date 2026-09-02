@@ -80,29 +80,21 @@
 
   section.scene{ position:relative; z-index:2; padding:clamp(2.2rem,8vw,3.2rem) clamp(1.3rem,7vw,2.4rem); }
 
-  /* ===== EXPEDITION ROUTE - one single continuous SVG path, styled as
-     a thin ship's rope =====
-     Geometry lives in ONE <path> (built in JS by buildGlobalRoute after
-     layout settles, from real rendered section positions). That path
-     sits in <defs> as a template only; four <use> layers reference the
-     exact same "d" to paint a rope (soft shadow + body + two twist
-     strokes) without ever duplicating the geometry itself. All four
-     share one stroke-dasharray/dashoffset (set together in JS) so the
-     rope reveals as one continuous piece on scroll, never as separate
-     fragments. The coin is a single scroll-progress marker that slides
-     along this same path via getPointAtLength(). */
-  .global-route{ position:absolute; top:0; left:0; z-index:0; pointer-events:none; overflow:visible; }
-  .global-route use.rope-shadow,
-  .global-route use.rope-body,
-  .global-route use.rope-twist-dark,
-  .global-route use.rope-twist-light{
-    fill:none; vector-effect:non-scaling-stroke; stroke-linecap:round;
+  /* Mobile storytelling: один свайп — одна глава. min-height задаёт
+     только нижнюю границу (не обрезает контент, если секция сама по
+     себе длиннее экрана — она просто становится выше). */
+  @media (max-width:819px){
+    html{ scroll-snap-type:y mandatory; }
+    section.scene{
+      min-height:100vh; min-height:100svh; min-height:100dvh;
+      display:flex; flex-direction:column; justify-content:center;
+      scroll-snap-align:start; scroll-snap-stop:always;
+    }
   }
-  .global-route use.rope-shadow{ stroke:#3B2A17; stroke-width:6.5px; opacity:.22; transform:translate(0,1.4px); }
-  .global-route use.rope-body{ stroke:#B4915E; stroke-width:5px; opacity:.8; }
-  .global-route use.rope-twist-dark{ stroke:#6B4A2A; stroke-width:2.6px; stroke-dasharray:4.5 5.5; opacity:.55; }
-  .global-route use.rope-twist-light{ stroke:#E4C793; stroke-width:2.2px; stroke-dasharray:4.5 5.5; stroke-dashoffset:5px; opacity:.5; }
-  .global-route .route-coin{ opacity:0; transform-box:fill-box; transform-origin:center; transition:opacity .4s ease; }
+  @media (max-width:819px) and (prefers-reduced-motion: reduce){
+    html{ scroll-snap-type:none; }
+  }
+
   @media (prefers-reduced-motion: reduce){ [data-reveal]{ opacity:1; transform:none; transition:none; } }
 
   /* ===== BUTTONS ===== */
@@ -139,6 +131,16 @@
   }
   .hero-cta-overlay:hover{ box-shadow:0 0 0 3px rgba(201,150,59,.35); }
   .hero-cta-overlay:active{ transform:scale(.97); }
+  /* Mobile: экран должен восприниматься как отдельная полноценная
+     страница, а не картинка с пустым тёмным полем под ней. */
+  @media (max-width:819px){
+    .cover-page{
+      min-height:100vh; min-height:100svh; min-height:100dvh;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding-top:calc(1.2rem + env(safe-area-inset-top));
+      padding-bottom:calc(1.2rem + env(safe-area-inset-bottom));
+    }
+  }
 
   /* ===== NOTE — final baked visual (24 сент. → countdown), with a
      live ticking countdown overlaid on the drawn plaque via percentage
@@ -343,7 +345,11 @@
     box-shadow:0 1.8rem 3.5rem rgba(0,0,0,.45);
   }
   .chest-media{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
-  .chest-video{ opacity:0; transition:opacity .4s ease; }
+  /* Плавный переход видео открытия -> статичный постер открытого сундука:
+     видео уходит в прозрачность дольше и мягче, картинка под ним уже
+     готова, поэтому это выглядит как один непрерывный кроссфейд, а не
+     мгновенная подмена. */
+  .chest-video{ opacity:0; transition:opacity .65s cubic-bezier(.22,.61,.36,1); }
   .chest-video.chest-video-active{ opacity:1; }
   .chest-cta-overlay{
     position:absolute; left:26.7%; width:46.6%; top:85.6%; height:9.7%;
@@ -353,6 +359,11 @@
   }
   .chest-cta-overlay:hover{ box-shadow:0 0 0 3px rgba(201,150,59,.35); }
   .chest-cta-overlay:active{ transform:scale(.96); }
+  /* Явная реакция на нажатие перед стартом видео (лёгкий пульс), а не
+     просто мгновенное :active. */
+  .chest-cta-overlay.chest-pressed{ animation:chestPress .22s ease; }
+  @keyframes chestPress{ 0%{ transform:scale(1); } 45%{ transform:scale(.98); } 100%{ transform:scale(1); } }
+  @media (prefers-reduced-motion: reduce){ .chest-cta-overlay.chest-pressed{ animation:none; } }
   .chest-cta-overlay:disabled{ pointer-events:none; opacity:0; }
 
   /* Reveal after the chest fully opens: a small parchment-label CTA,
@@ -392,6 +403,14 @@
   }
   .treasures-back:hover{ box-shadow:0 0 0 3px rgba(201,150,59,.35); }
   .treasures-back:active{ transform:scale(.97); }
+  @media (max-width:819px){
+    .treasures-page{
+      min-height:100vh; min-height:100svh; min-height:100dvh;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding-top:calc(1.2rem + env(safe-area-inset-top));
+      padding-bottom:calc(1.2rem + env(safe-area-inset-bottom));
+    }
+  }
   @media (prefers-reduced-motion: reduce){
     .chest-next-inner{ transition:none; }
     .chest-video{ transition:none; }
@@ -462,11 +481,11 @@
   }
   .opening-overlay.opening-hide-text{ opacity:0; pointer-events:none; }
   .opening-msg{
-    font-family:var(--font-display); font-style:italic; font-weight:700; color:var(--ivory);
+    width:100%; font-family:var(--font-display); font-style:italic; font-weight:700; color:var(--ivory);
     font-size:clamp(1.5rem,7.5vw,2.1rem); line-height:1.18; text-shadow:0 .2rem 1rem rgba(0,0,0,.6);
   }
   .opening-sub{
-    font-size:.86rem; color:rgba(246,238,220,.75); margin-top:.9rem; letter-spacing:.03em;
+    width:100%; font-size:.86rem; color:rgba(246,238,220,.75); margin-top:.9rem; letter-spacing:.03em;
     text-shadow:0 .1rem .5rem rgba(0,0,0,.6);
   }
   .opening-btn{ margin-top:1.7rem; max-width:320px; animation:openingGlow 2.6s ease-in-out infinite; }
@@ -474,10 +493,23 @@
     0%,100%{ box-shadow:0 .6rem 1.3rem rgba(214,162,76,.28); }
     50%{ box-shadow:0 .6rem 1.6rem rgba(214,162,76,.6); }
   }
+  /* Mobile: нижний информационный блок мельче всего читается на маленьких
+     экранах — крупнее текст, крупнее CTA, больше touch target. */
+  @media (max-width:819px){
+    .opening-overlay{
+      padding:2rem clamp(1.4rem,8vw,2.2rem) calc(3.6rem + env(safe-area-inset-bottom)) clamp(1.4rem,8vw,2.2rem);
+    }
+    .opening-msg{ font-size:clamp(2rem,9.5vw,2.5rem); line-height:1.16; }
+    .opening-sub{ font-size:1rem; margin-top:1.1rem; }
+    .opening-btn{
+      margin-top:2.1rem; max-width:360px; font-size:1.12rem;
+      padding:1.2rem 1.9rem; min-height:56px;
+    }
+  }
   @media (prefers-reduced-motion: reduce){ .opening-btn{ animation:none; } }
 
   /* ===== ADMIN ===== */
-  .admin{ min-height:100vh; background:var(--paper); color:var(--ink); padding:2rem 1.1rem 4rem; }
+  .admin{ min-height:100vh; min-height:100svh; min-height:100dvh; background:var(--paper); color:var(--ink); padding:2rem 1.1rem calc(4rem + env(safe-area-inset-bottom)); }
   .admin-head{ max-width:720px; margin:0 auto 1.5rem; }
   .admin-head h1{ font-size:1.4rem; }
   .admin-head p{ color:var(--ink-soft); margin-top:.3rem; font-size:.92rem; }
@@ -1335,21 +1367,6 @@
 
   function renderInvitation(){
     return '<div class="scroll-map" id="scroll-map">' +
-      '<svg class="global-route" id="global-route-svg" aria-hidden="true">' +
-        '<defs>' +
-          '<path id="global-route-path" d="" />' +
-          '<mask id="route-reveal-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">' +
-            '<use href="#global-route-path" id="route-reveal-mask-stroke" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" vector-effect="non-scaling-stroke" />' +
-          '</mask>' +
-        '</defs>' +
-        '<g mask="url(#route-reveal-mask)">' +
-          '<use href="#global-route-path" class="rope-shadow" />' +
-          '<use href="#global-route-path" class="rope-body" />' +
-          '<use href="#global-route-path" class="rope-twist-dark" />' +
-          '<use href="#global-route-path" class="rope-twist-light" />' +
-        '</g>' +
-        '<use href="#ic-coin" class="route-coin" id="route-coin-marker" width="22" height="22" x="-11" y="-11" />' +
-      '</svg>' +
       '<a class="back-to-cover" href="#" data-page="cover">← К обложке</a>' +
       sceneNote() +
       sceneRoute() +
@@ -1446,153 +1463,6 @@
     }, finalDelayMs);
   }
 
-  /* =========================================================
-     GLOBAL EXPEDITION ROUTE — one continuous <path> through the
-     whole invitation, geometry measured from real rendered section
-     rects (not guessed percentages) so it never fights the layout.
-     Large illustrations (route/find/before) naturally occlude it —
-     their .scene wrapper sits at z-index:2, the route svg at 0 —
-     so the line ducks behind them and reappears in the gaps.
-     ========================================================= */
-  var routeState = { built:false, total:0, targetFrac:0, displayFrac:0 };
-
-  function buildGlobalRoute(){
-    var container = document.getElementById("scroll-map");
-    var svg = document.getElementById("global-route-svg");
-    var path = document.getElementById("global-route-path");
-    var maskStroke = document.getElementById("route-reveal-mask-stroke");
-    if(!container || !svg || !path || !maskStroke) return;
-
-    var ids = ["note","route","find","before","rsvp"];
-    var contRect = container.getBoundingClientRect();
-    var W = container.clientWidth;
-    if(!W) return;
-    var rects = {};
-    for(var i=0;i<ids.length;i++){
-      var el = document.getElementById(ids[i]);
-      if(!el) return;
-      var r = el.getBoundingClientRect();
-      var top = r.top - contRect.top;
-      rects[ids[i]] = { top: top, h: r.height, bottom: top + r.height };
-    }
-    var H = Math.max(container.scrollHeight, rects.rsvp.bottom);
-    svg.setAttribute("width", W);
-    svg.setAttribute("height", H);
-    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-
-    function pt(xf, y){ return { x: xf * W, y: y }; }
-    var nt = rects.note, rt = rects.route,
-        fn = rects.find, bf = rects.before, rs = rects.rsvp;
-
-    var p0 = pt(0.50, Math.max(0, nt.top));
-    var pNote = pt(0.85, nt.top + nt.h * 0.35);
-    var p1 = pt(0.22, nt.top + nt.h * 0.65);
-    var p2 = pt(0.50, nt.bottom - nt.h * 0.04);
-    var p3 = pt(0.68, rt.top + rt.h * 0.45);
-    var p4 = pt(0.28, rt.bottom - rt.h * 0.05);
-    var p5 = pt(0.62, fn.top + fn.h * 0.50);
-    var p6 = pt(0.34, fn.bottom - fn.h * 0.04);
-    var p7 = pt(0.55, bf.top + bf.h * 0.55);
-    var p8 = pt(0.50, bf.bottom - bf.h * 0.03);
-    var p9 = pt(0.90, rs.top + rs.h * 0.20);
-    var pts = [p0,pNote,p1,p2,p3,p4,p5,p6,p7,p8,p9];
-
-    var d = "M " + p0.x.toFixed(1) + "," + p0.y.toFixed(1);
-    for(var k=1;k<pts.length;k++){
-      var a = pts[k-1], b = pts[k], midY = ((a.y+b.y)/2).toFixed(1);
-      d += " C " + a.x.toFixed(1) + "," + midY + " " + b.x.toFixed(1) + "," + midY + " " + b.x.toFixed(1) + "," + b.y.toFixed(1);
-    }
-    path.setAttribute("d", d);
-
-    var total = path.getTotalLength();
-    var reduced = prefersReducedMotion();
-    maskStroke.style.strokeDasharray = total + "px";
-    maskStroke.style.strokeDashoffset = reduced ? "0px" : total + "px";
-
-    var currentFrac = scrollProgressFraction();
-    routeState.built = true;
-    routeState.total = total;
-    routeState.targetFrac = currentFrac;
-    routeState.displayFrac = currentFrac;
-    positionCoinAt(currentFrac);
-  }
-
-  function scrollProgressFraction(){
-    var vh = window.innerHeight || document.documentElement.clientHeight;
-    var doc = document.documentElement;
-    var docH = Math.max(doc.scrollHeight, doc.offsetHeight) - vh;
-    var scrollY = window.scrollY || doc.scrollTop || 0;
-    var progress = docH > 0 ? scrollY / docH : 0;
-    return Math.max(0, Math.min(1, progress));
-  }
-
-  function positionCoinAt(frac){
-    var path = document.getElementById("global-route-path");
-    var coinEl = document.getElementById("route-coin-marker");
-    if(!path || !coinEl || !routeState.total) return;
-    var L = frac * routeState.total;
-    var p = path.getPointAtLength(L);
-    var aheadL = Math.min(routeState.total, L + Math.max(4, routeState.total * 0.004));
-    var angle = 0;
-    if(aheadL > L){
-      var p2 = path.getPointAtLength(aheadL);
-      angle = Math.atan2(p2.y - p.y, p2.x - p.x) * 180 / Math.PI;
-    }
-    coinEl.setAttribute("x", (p.x - 11).toFixed(1));
-    coinEl.setAttribute("y", (p.y - 11).toFixed(1));
-    coinEl.style.transform = "rotate(" + angle.toFixed(1) + "deg)";
-    coinEl.style.opacity = "1";
-  }
-
-  // Монетка плавно "догоняет" реальный scroll progress (lerp за кадр),
-  // а не прыгает к нему — rAF-цикл сам себя останавливает, как только
-  // разница станет незаметной, чтобы не крутиться вхолостую.
-  var coinRafId = null;
-  function stepCoinTowardTarget(){
-    var diff = routeState.targetFrac - routeState.displayFrac;
-    if(Math.abs(diff) < 0.0006){
-      routeState.displayFrac = routeState.targetFrac;
-      positionCoinAt(routeState.displayFrac);
-      coinRafId = null;
-      return;
-    }
-    routeState.displayFrac += diff * 0.16;
-    positionCoinAt(routeState.displayFrac);
-    coinRafId = requestAnimationFrame(stepCoinTowardTarget);
-  }
-
-  function updateRouteProgress(){
-    if(!routeState.built) return;
-    var progress = scrollProgressFraction();
-    var reduced = prefersReducedMotion();
-    if(!reduced){
-      var maskStroke = document.getElementById("route-reveal-mask-stroke");
-      if(maskStroke) maskStroke.style.strokeDashoffset = (routeState.total * (1 - progress)) + "px";
-    }
-    routeState.targetFrac = progress;
-    if(reduced){
-      routeState.displayFrac = progress;
-      positionCoinAt(progress);
-    } else if(coinRafId == null){
-      coinRafId = requestAnimationFrame(stepCoinTowardTarget);
-    }
-  }
-
-  var routeScrollTicking = false;
-  window.addEventListener("scroll", function(){
-    if(routeScrollTicking) return;
-    routeScrollTicking = true;
-    requestAnimationFrame(function(){ updateRouteProgress(); routeScrollTicking = false; });
-  }, { passive:true });
-
-  var routeResizeTimer = null;
-  window.addEventListener("resize", function(){
-    clearTimeout(routeResizeTimer);
-    routeResizeTimer = setTimeout(function(){
-      if(state.view !== "admin") buildGlobalRoute();
-    }, 200);
-  });
-
   function initChestInteractions(){
     // "Пополнить сокровищницу →" now really navigates to #treasures —
     // handled by the generic [data-page] click delegate below, nothing
@@ -1625,40 +1495,46 @@
         setTimeout(revealNextCta, prefersReducedMotion() ? 0 : 600);
       }
 
-      if(prefersReducedMotion() || !video){
-        finishToOpen();
+      function startOpening(){
+        if(prefersReducedMotion() || !video){
+          finishToOpen();
+          return;
+        }
+
+        video.addEventListener("error", finishToOpen, { once:true });
+        video.addEventListener("ended", finishToOpen, { once:true });
+
+        var revealed = false;
+        function revealVideo(){
+          if(revealed) return;
+          revealed = true;
+          video.classList.add("chest-video-active");
+        }
+        video.addEventListener("playing", revealVideo, { once:true });
+        setTimeout(revealVideo, 400);
+
+        try{
+          video.src = CHEST_OPEN_VIDEO_DATA_URI;
+          video.load();
+          var p = video.play();
+          if(p && p.catch) p.catch(finishToOpen);
+        }catch(e){ finishToOpen(); }
+      }
+
+      // STEP 1-2: лёгкая реакция на нажатие и короткая пауза перед стартом,
+      // чтобы открытие не ощущалось мгновенным/резким.
+      if(prefersReducedMotion()){
+        startOpening();
         return;
       }
-
-      video.addEventListener("error", finishToOpen, { once:true });
-      video.addEventListener("ended", finishToOpen, { once:true });
-
-      var revealed = false;
-      function revealVideo(){
-        if(revealed) return;
-        revealed = true;
-        video.classList.add("chest-video-active");
-      }
-      video.addEventListener("playing", revealVideo, { once:true });
-      setTimeout(revealVideo, 400);
-
-      try{
-        video.src = CHEST_OPEN_VIDEO_DATA_URI;
-        video.load();
-        var p = video.play();
-        if(p && p.catch) p.catch(finishToOpen);
-      }catch(e){ finishToOpen(); }
+      btn.classList.add("chest-pressed");
+      setTimeout(startOpening, 130);
     });
   }
 
   function initInteractions(){
     if(state.view === "admin") return;
-    requestAnimationFrame(function(){ requestAnimationFrame(buildGlobalRoute); });
     initChestInteractions();
-    var beforeImg = document.querySelector(".before-img");
-    if(beforeImg && !beforeImg.complete){
-      beforeImg.addEventListener("load", buildGlobalRoute, { once:true });
-    }
 
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(en){
