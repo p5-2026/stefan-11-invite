@@ -102,6 +102,11 @@
       display:flex; flex-direction:column; justify-content:center;
       scroll-snap-align:start; scroll-snap-stop:always;
     }
+    /* Короткая записка родителям — не растягивать на весь экран,
+       иначе перед сундуком получается огромный пустой промежуток. */
+    section.scene.parents{
+      min-height:0; scroll-snap-align:none; scroll-snap-stop:normal;
+    }
   }
   @media (max-width:819px) and (prefers-reduced-motion: reduce){
     html{ scroll-snap-type:none; }
@@ -1251,7 +1256,7 @@
       ? '<img class="chest-media chest-img" id="chest-img" src="' + CHEST_OPEN_POSTER_DATA_URI + '" alt="" />'
       : (
           '<img class="chest-media chest-img" id="chest-img" src="' + CHEST_CLOSED_IMG_DATA_URI + '" alt="" />' +
-          '<video class="chest-media chest-video" id="chest-video" muted playsinline webkit-playsinline="true" preload="none"></video>' +
+          '<video class="chest-media chest-video" id="chest-video" muted playsinline webkit-playsinline="true" preload="auto"></video>' +
           '<button class="chest-cta-overlay" id="chest-open-btn" aria-label="' + T.chest.cta.replace(/→/g,"").trim() + '"></button>' +
           '<p class="sr-only">' + escapeHTML(T.chest.title) + '. ' + escapeHTML(T.chest.hint) + '</p>'
         );
@@ -1529,7 +1534,7 @@
         setTimeout(revealVideo, 400);
 
         try{
-          video.src = CHEST_OPEN_VIDEO_DATA_URI;
+          video.src = "./IMG_8829.mp4";
           video.load();
           var p = video.play();
           if(p && p.catch) p.catch(finishToOpen);
