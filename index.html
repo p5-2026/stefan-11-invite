@@ -1548,14 +1548,13 @@
         }catch(e){ finishToOpen(); }
       }
 
-      // STEP 1-2: лёгкая реакция на нажатие и короткая пауза перед стартом,
-      // чтобы открытие не ощущалось мгновенным/резким.
-      if(prefersReducedMotion()){
-        startOpening();
-        return;
-      }
+      // video.play() должен вызываться синхронно в обработчике клика —
+      // iOS Safari молча блокирует .play(), если он идёт из setTimeout,
+      // и тогда код проваливается в fallback (мгновенное открытие без
+      // видео). Визуальную паузу перед появлением видео даёт fade-in
+      // (revealVideo/chest-video-active), а не задержка самого play().
       btn.classList.add("chest-pressed");
-      setTimeout(startOpening, 130);
+      startOpening();
     });
   }
 
