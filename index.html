@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Секретная миссия — день рождения Степана</title>
 <meta name="theme-color" content="#123F3C" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -61,6 +66,13 @@
     position:relative; max-width:var(--map-max); margin:0 auto; overflow:hidden;
     background:linear-gradient(175deg,var(--paper) 0%,var(--paper-soft) 55%,var(--paper-deep) 100%);
     box-shadow:0 0 0 1px rgba(0,0,0,.25), 0 2rem 5rem rgba(0,0,0,.45);
+  }
+  /* Mobile: снять фиксированный --map-max (520px) с крупных иллюстраций —
+     на телефоне они должны занимать почти всю ширину экрана. */
+  @media (max-width:768px){
+    .scroll-map, .hero-cover-frame, .note-visual-frame, .treasures-visual-frame{
+      max-width:calc(100vw - 16px);
+    }
   }
   .scroll-map::after{
     content:""; position:absolute; inset:0; background:#fff; opacity:.045;
@@ -530,6 +542,9 @@
   .credit{ position:relative; z-index:2; text-align:center; padding:1.2rem 1rem; font-size:.72rem; color:var(--ink-soft); opacity:.6; }
   .credit a{ color:var(--ink-soft); text-decoration:none; }
 </style>
+</head>
+<body>
+
 
 <div class="defs" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
   <svg><defs>
@@ -1743,3 +1758,5 @@
 })();
 </script>
 
+</body>
+</html>
