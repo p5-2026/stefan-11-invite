@@ -1495,6 +1495,16 @@
 
     var btn = document.getElementById("chest-open-btn");
     if(!btn) return;
+
+    // Грузим видео заранее (как в opening-sequence), а не в момент тапа —
+    // на iPhone play() сразу после load() может не успеть и провалиться
+    // в fallback без видимого видео.
+    var preloadVideo = document.getElementById("chest-video");
+    if(preloadVideo){
+      preloadVideo.src = "./IMG_8829.MP4";
+      try{ preloadVideo.load(); }catch(e){}
+    }
+
     btn.addEventListener("click", function(){
       if(btn.disabled) return;
       btn.disabled = true;
@@ -1539,9 +1549,6 @@
         setTimeout(revealVideo, 400);
 
         try{
-          video.src = "./IMG_8829.MP4";
-          video.load();
-          video.currentTime = 0;
           video.playbackRate = 1;
           var p = video.play();
           if(p && p.catch) p.catch(finishToOpen);
